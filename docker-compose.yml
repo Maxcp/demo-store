@@ -1,0 +1,35 @@
+version: '3'
+
+services:
+  mysql:
+    image: mysql:latest
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: demo-store
+      MYSQL_USER: root
+      MYSQL_PASSWORD: root
+    networks:
+      - backend
+
+  demo-store:
+    depends_on:
+      - mysql
+    build: .
+    ports:
+      - "8080:8080"
+    restart: always
+    networks:
+      - backend
+
+
+
+networks:
+  backend:
+
+volumes:
+  mysql_data:
