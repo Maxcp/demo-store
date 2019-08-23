@@ -50,9 +50,9 @@ public class CheckoutManagement {
 
         AtomicReference<BigDecimal> discountPool = new AtomicReference<>(new BigDecimal(0L));
 
-        discounts.forEach( d -> {
-                  discountPool.updateAndGet(v -> v.add (Objects.requireNonNull(applyDiscounts(d , checkoutRequest.getItems()))));
-        });
+        discounts.forEach( d ->
+                  discountPool.updateAndGet(v -> v.add (Objects.requireNonNull(applyDiscounts(d , checkoutRequest.getItems()))))
+        );
 
         discountPool.get();
         logger.info("Discounts applied");
@@ -102,7 +102,7 @@ public class CheckoutManagement {
      * @param items
      * @return List of Item
      */
-    private List<Item> aggregateItemsByProductId(List<Item> items) {
+     List<Item> aggregateItemsByProductId(List<Item> items) {
         Map<Long,Item> productList = new HashMap<>();
 
         for (Item item : items ){

@@ -6,9 +6,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import triggerise.org.demostore.model.Discount;
 import triggerise.org.demostore.model.DiscountType;
+import triggerise.org.demostore.model.Product;
 import triggerise.org.demostore.service.DiscountService;
 import triggerise.org.demostore.service.ProductService;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.List;
 
 @Component
@@ -38,6 +41,7 @@ public class DiscountManagement {
         logger.info("creating Discounts");
 
         if (discountService.getDiscounts().isEmpty()) {
+
             Discount discount1 = new Discount();
 
             discount1.setProduct( productService.findByName("TICKET"));
@@ -58,4 +62,48 @@ public class DiscountManagement {
 
 
     }
+
+
+    public BigDecimal apply(Product product, Discount discount, Integer quantity){
+        BigDecimal discountApplied = BigDecimal.ZERO;
+
+        if (quantity >= discount.getRule()) {
+            switch (discount.getDiscountType()) {
+                case N_PAY_X:
+                    discountApplied = applyNPayX(product, discount, quantity);
+                    break;
+                case VALUE_BULK:
+                    discountApplied = applyValueBulk(discount,quantity);
+                    break;
+                case DEFAULT:
+                    discountApplied = applyDefault(product, discount,quantity);
+                    break;
+            }
+        }
+        return discountApplied;
+    }
+
+    private BigDecimal applyNPayX(Product product, Discount discount, Integer quantity){
+        Integer quantityPackDiscounted = quantity / discount.getRule();
+        Integer numberDiscounted = discount.getRule() - discount.getValue();
+
+        int productMultiplier = quantityPackDiscounted * numberDiscounted;
+
+        return product.getPrice().multiply(new BigDecimal(productMultiplier));
+
+
+    }
+
+    private BigDecimal applyValueBulk(Discount discount,Integer quantity){
+        if (quantity >= discount.getRule()) {
+            return new BigDecimal(discount.getValue()).multiply(new BigDecimal(quantity));
+        }
+        return BigDecimal.ZERO;
+    }
+
+    private BigDecimal applyDefault(Product product, Discount discount,Integer quantity){
+        BigDecimal percentage = new BigDecimal(discount.getValue()).divide(new BigDecimal(100),2, RoundingMode.DOWN);
+        return product.getPrice().multiply(percentage).multiply(new BigDecimal(quantity));
+    }
+
 }
