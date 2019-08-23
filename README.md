@@ -1,4 +1,4 @@
-# Triggerise Demo Store API
+# Demo Store API
 
 
 ### Project Guide
